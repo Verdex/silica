@@ -1,5 +1,4 @@
 
-mod input;
 mod lexeme;
 
 mod lex;
