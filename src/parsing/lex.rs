@@ -59,25 +59,62 @@ impl Lexer for BoolLexer {
 struct IntegerLexer {}
 
 impl Lexer for IntegerLexer {
-    fn usable(&self, input : &mut Peekable<CharIndices>) -> bool {
+    fn usable<'a>(&self, input : &mut Input<'a>) -> bool {
         match input.peek() {
             Some((index, c)) => c.is_digit(10),
             None => false,
         }
     }
 
-    fn lex(&self, input : &mut Peekable<CharIndices>) -> Lexeme {
+    fn lex<'a>(&self, input : &mut Input<'a>) -> Result<Lexeme, usize> {
         let mut digits = vec![];
 
-        let v = input.next();
+        let mut rp = input.restore_point();
+        let mut v = input.next();
 
         loop {
             match v {
                 Some((_, v)) if v.is_digit(10) => digits.push(v),
+                Some((_, _)) => { input.restore(rp); break}
                 _ => break
             }
+            rp = input.restore_point();
+            v = input.next();
         }
 
-        Lexeme::Integer(digits.into_iter().collect::<String>().parse::<i64>().expect("parse::<i64>() failure"))
+        Ok(Lexeme::Integer(digits.into_iter().collect::<String>().parse::<i64>().expect("parse::<i64>() failure")))
     }
+}
+
+// TODO Decimal Lexer
+// TODO sci notation lexer (?)
+// TODO Number lexer
+// TODO add indices to lexemes
+
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn integer_lexer_should_lex_standard_integer() {
+        let lex = IntegerLexer {};
+        let mut input = Input { cs : "1234".char_indices().peekable() };
+
+        let r = lex.lex(&mut input).expect("IntegerLexer should lex standard integer");
+
+        assert_eq!( r, Lexeme::Integer(1234) );
+    }
+
+    #[test]
+    fn integer_lexer_should_not_conume_ending_input() {
+        let lex = IntegerLexer {};
+        let mut input = Input { cs : "1234s".char_indices().peekable() };
+
+        let r = lex.lex(&mut input).expect("IntegerLexer should lex standard integer");
+
+        assert_eq!( r, Lexeme::Integer(1234) );
+        assert!( matches!( input.next(), Some((_, 's'))) );
+    }
+
 }
