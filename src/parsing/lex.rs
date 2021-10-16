@@ -13,6 +13,28 @@ pub fn lex(s : &str) -> Vec<Lexeme> {
     vec![]
 }
 
+struct Input<'a> {
+    cs : Peekable<CharIndices<'a>>
+}
+
+impl<'a> Input<'a> {
+    fn restore_point(&self) -> Peekable<CharIndices<'a>> {
+        self.cs.clone()
+    }
+
+    fn restore(&mut self, rp : Peekable<CharIndices<'a>>) {
+        self.cs = rp;
+    }
+
+    fn next(&mut self) -> Option<(usize, char)> {
+        self.cs.next()
+    }
+
+    fn peek(&mut self) -> Option<&(usize, char)> {
+        self.cs.peek()
+    }
+}
+
 trait Lexer {
     fn usable(&self, input : &mut Peekable<CharIndices>) -> bool;
     fn lex(&self, input : &mut Peekable<CharIndices>) -> Lexeme;
