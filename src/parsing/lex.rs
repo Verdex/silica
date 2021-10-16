@@ -95,8 +95,15 @@ impl Lexer for BoolLexer {
     }
 
     fn lex<'a>(&self, input : &mut Input<'a>) -> Result<Lexeme, usize> {
-        // TODO
-        Err(0)
+        let symbol_lexer = SymbolLexer {};
+
+        let rp = input.restore_point();
+
+        match symbol_lexer.lex(input) {
+            Ok(Lexeme::LowerCaseSymbol(lexeme)) if lexeme == "true" => Ok(Lexeme::Bool(true)),
+            Ok(Lexeme::LowerCaseSymbol(lexeme)) if lexeme == "false" => Ok(Lexeme::Bool(false)),
+            _ => { input.restore(rp); Err(0) }, // TODO need a way to grab index
+        }
     }
 }
 
@@ -134,11 +141,46 @@ impl Lexer for IntegerLexer {
 // TODO sci notation lexer (?)
 // TODO Number lexer
 // TODO add indices to lexemes
+// TODO string lexer
+// TODO punctuation lexers
+// TODO junk lexers
 
 
 #[cfg(test)]
 mod test {
     use super::*;
+
+    #[test]
+    fn bool_lexer_should_lex_true() {
+        let lex = BoolLexer {};
+        let mut input = Input { cs : "true".char_indices().peekable() };
+
+        let r = lex.lex(&mut input).expect("BoolLexer should lex bool");
+
+        assert_eq!( r, Lexeme::Bool(true) );
+    }
+
+    #[test]
+    fn bool_lexer_should_lex_false() {
+        let lex = BoolLexer {};
+        let mut input = Input { cs : "false".char_indices().peekable() };
+
+        let r = lex.lex(&mut input).expect("BoolLexer should lex bool");
+
+        assert_eq!( r, Lexeme::Bool(false) );
+    }
+
+    #[test]
+    fn bool_lexer_should_not_consume_boolish_symbol() {
+        let lex = BoolLexer {};
+        let mut input = Input { cs : "trueish".char_indices().peekable() };
+
+        let r = lex.lex(&mut input);
+
+        assert!( matches!( r, Err(_) ) );
+
+        assert!( matches!( input.next(), Some((_, 't')) ) );
+    }
 
     #[test]
     fn symbol_lexer_should_lex_upper_case_symbol() {
