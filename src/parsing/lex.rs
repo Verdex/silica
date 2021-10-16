@@ -36,8 +36,24 @@ impl<'a> Input<'a> {
 }
 
 trait Lexer {
-    fn usable(&self, input : &mut Peekable<CharIndices>) -> bool;
-    fn lex(&self, input : &mut Peekable<CharIndices>) -> Lexeme;
+    fn usable<'a>(&self, input : &mut Input<'a>) -> bool;
+    fn lex<'a>(&self, input : &mut Input<'a>) -> Result<Lexeme, usize>;
+}
+
+struct BoolLexer {}
+
+impl Lexer for BoolLexer {
+    fn usable<'a>(&self, input : &mut Input<'a>) -> bool {
+        match input.peek() {
+            Some((index, c)) => *c == 't' || *c == 'f',
+            None => false,
+        }
+    }
+
+    fn lex<'a>(&self, input : &mut Input<'a>) -> Result<Lexeme, usize> {
+        // TODO
+        Err(0)
+    }
 }
 
 struct IntegerLexer {}
