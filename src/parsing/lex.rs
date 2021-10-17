@@ -252,6 +252,43 @@ mod test {
     use super::*;
 
     #[test]
+    fn junk_lexer_usable_should_leave_input_alone_for_lonely_slash() {
+        let lex = JunkLexer {};
+        let mut input = Input { cs : "/ *".char_indices().peekable() };
+
+        let result = lex.usable(&mut input);
+
+        assert_eq!( result, false );
+
+        assert!( matches!( input.next(), Some((_, '/') ) ) );
+    }
+
+    #[test]
+    fn junk_lexer_should_lex_whitespace() {
+
+    }
+
+    #[test]
+    fn junk_lexer_should_lex_whitespace_and_comment() {
+
+    }
+    
+    #[test]
+    fn junk_lexer_should_lex_nested_comment() {
+
+    }
+
+    #[test]
+    fn junk_lexer_should_lex_almost_but_not_quite_comment_end() {
+
+    }
+
+    #[test]
+    fn junk_lexer_should_leave_lonely_slash() {
+
+    }
+
+    #[test]
     fn string_lexer_should_lex_string() {
         let lex = StringLexer {};
         let mut input = Input { cs : r#""this is a \t \n \r \" \\ string""#.char_indices().peekable() };
