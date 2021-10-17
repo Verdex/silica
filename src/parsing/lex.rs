@@ -198,6 +198,21 @@ mod test {
     use super::*;
 
     #[test]
+    fn string_lexer_should_lex_string() {
+        let lex = StringLexer {};
+        let mut input = Input { cs : r#""this is a \t \n \r \" \\ string""#.char_indices().peekable() };
+
+        let r = lex.lex(&mut input).expect("StringLexer should lex string");
+
+        match r {
+            Lexeme::String(s) => assert_eq!(s, "this is a \t \n \r \" \\ string"),
+            _ => panic!("Expected string"),
+        }
+
+        assert_eq!( input.next(), None );
+    }
+
+    #[test]
     fn bool_lexer_should_lex_true() {
         let lex = BoolLexer {};
         let mut input = Input { cs : "true".char_indices().peekable() };
