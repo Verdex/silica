@@ -40,6 +40,60 @@ trait Lexer {
     fn lex<'a>(&self, input : &mut Input<'a>) -> Result<Lexeme, usize>;
 }
 
+struct JunkLexer {}
+
+impl Lexer for JunkLexer {
+    fn usable<'a>(&self, input : &mut Input<'a>) -> bool {
+        match input.peek() {
+            Some((_, c)) if c.is_whitespace() => return true,
+            Some((_, '/'))=> { },
+            _ => return false,
+        }
+
+        let rp = input.restore_point();
+
+        input.next();
+
+        match input.next() {
+            Some((_, '*')) => { input.restore(rp); true },
+            _ => { input.restore(rp); false },
+        }
+    }
+
+    fn lex<'a>(&self, input : &mut Input<'a>) -> Result<Lexeme, usize> {
+        let mut comment = 0;
+
+        loop {
+            if comment > 0 {
+                match input.next() {
+                    Some((_, '*')) => {
+                        match input.next() {
+                            Some((_, '/')) => { comment-=1; },
+                            _ => { },
+                        }
+                    },
+                    Some((_, _)) => { },
+                    None => return Err(0),  // TODO end of file
+                }
+            }
+            else {
+                match input.peek() {
+                    Some((_, c)) if c.is_whitespace() => { input.next(); },
+                    Some((_, '/')) => {
+                        let rp = input.restore_point();
+                        input.next();
+                        match input.peek() {
+                            Some((_, '*')) => { input.next(); comment+=1 },
+                            _ => { input.restore(rp); return Ok(Lexeme::Junk); },
+                        }
+                    },
+                    _ => return Ok(Lexeme::Junk),
+                }
+            }
+        }
+    }
+}
+
 struct SymbolLexer {}
 
 impl Lexer for SymbolLexer {
