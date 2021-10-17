@@ -45,7 +45,7 @@ struct SymbolLexer {}
 impl Lexer for SymbolLexer {
     fn usable<'a>(&self, input : &mut Input<'a>) -> bool {
         match input.peek() {
-            Some((index, c)) => c.is_alphabetic() || *c == '_',
+            Some((_, c)) => c.is_alphabetic() || *c == '_',
             None => false,
         }
     }
@@ -89,7 +89,7 @@ struct BoolLexer {}
 impl Lexer for BoolLexer {
     fn usable<'a>(&self, input : &mut Input<'a>) -> bool {
         match input.peek() {
-            Some((index, c)) => *c == 't' || *c == 'f',
+            Some((_, c)) => *c == 't' || *c == 'f',
             None => false,
         }
     }
@@ -112,7 +112,7 @@ struct IntegerLexer {}
 impl Lexer for IntegerLexer {
     fn usable<'a>(&self, input : &mut Input<'a>) -> bool {
         match input.peek() {
-            Some((index, c)) => c.is_digit(10),
+            Some((_, c)) => c.is_digit(10),
             None => false,
         }
     }
@@ -137,6 +137,53 @@ impl Lexer for IntegerLexer {
     }
 }
 
+struct StringLexer {}
+
+impl Lexer for StringLexer {
+    fn usable<'a>(&self, input : &mut Input<'a>) -> bool {
+        match input.peek() {
+            Some((_, c)) => *c == '"',
+            None => false,
+        }
+    }
+
+    fn lex<'a>(&self, input : &mut Input<'a>) -> Result<Lexeme, usize> {
+        let mut cs = vec![];
+
+        let rp = input.restore_point();
+        let mut v = input.next();
+
+        match v {
+            Some((_, '"')) => { },
+            _ => { input.restore(rp); return Err(0); }, // TODO index   
+        }
+
+        v = input.next();
+
+        loop {
+            match v {
+                Some((_, '"')) => break,
+                Some((_, '\\')) => {
+                    let escape = input.next();
+                    match escape {
+                        Some((_, 't')) => cs.push('\t'),
+                        Some((_, 'n')) => cs.push('\n'),
+                        Some((_, 'r')) => cs.push('\r'),
+                        Some((_, '\\')) => cs.push('\\'),
+                        Some((_, '"')) => cs.push('"'),
+                        Some((index, _)) => return Err(index),
+                        None => return Err(0), // TODO end of file
+                    }
+                },
+                Some((_, v)) => cs.push(v),
+                None => return Err(0), // TODO end of file
+            }
+            v = input.next();
+        }
+
+        Ok(Lexeme::String(cs.into_iter().collect::<String>()))
+    }
+}
 // TODO Decimal Lexer
 // TODO sci notation lexer (?)
 // TODO Number lexer
