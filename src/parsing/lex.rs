@@ -8,7 +8,7 @@ use super::lexeme::Lexeme;
 pub fn lex(s : &str) -> Vec<Lexeme> {
 
 
-    let lexers : [&dyn Lexer; 1] = [ &IntegerLexer{} ];
+    let lexers : [&dyn Lexer; 2] = [ &BoolLexer{}, &IntegerLexer{} ];
 
     vec![]
 }
@@ -184,11 +184,11 @@ impl Lexer for StringLexer {
         Ok(Lexeme::String(cs.into_iter().collect::<String>()))
     }
 }
+
 // TODO Decimal Lexer
 // TODO sci notation lexer (?)
 // TODO Number lexer
 // TODO add indices to lexemes
-// TODO string lexer
 // TODO punctuation lexers
 // TODO junk lexers
 
