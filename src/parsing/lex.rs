@@ -191,6 +191,7 @@ impl Lexer for IntegerLexer {
     }
 }
 
+
 struct StringLexer {}
 
 impl Lexer for StringLexer {
@@ -265,17 +266,40 @@ mod test {
 
     #[test]
     fn junk_lexer_should_lex_whitespace() {
+        let lex = JunkLexer {};
+        let mut input = Input { cs : "    \t \r \n a".char_indices().peekable() };
 
+        let result = lex.lex(&mut input);
+
+        assert_eq!( result, Ok(Lexeme::Junk) );
+
+        assert!( matches!( input.next(), Some((_, 'a') ) ) );
     }
 
     #[test]
     fn junk_lexer_should_lex_whitespace_and_comment() {
+        let lex = JunkLexer {};
+        let mut input = Input { cs : " /* blah blah blah */ a".char_indices().peekable() };
 
+        let result = lex.lex(&mut input);
+
+        assert_eq!( result, Ok(Lexeme::Junk) );
+
+        assert!( matches!( input.next(), Some((_, 'a') ) ) );
     }
     
     #[test]
     fn junk_lexer_should_lex_nested_comment() {
+        let lex = JunkLexer {};
+        let mut input = Input { cs : " /* /* /* blah blah blah */ */ */ a".char_indices().peekable() };
 
+        let result = lex.lex(&mut input);
+
+        assert_eq!( result, Ok(Lexeme::Junk) );
+
+        panic!("{:?}", input.next());
+
+        assert!( matches!( input.next(), Some((_, 'a') ) ) );
     }
 
     #[test]
