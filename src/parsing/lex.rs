@@ -69,9 +69,17 @@ impl Lexer for JunkLexer {
                     Some((_, '*')) => {
                         match input.next() {
                             Some((_, '/')) => { comment-=1; },
-                            _ => { },
+                            Some((_, _)) => { },
+                            None => return Err(0), // TODO end of file
                         }
                     },
+                    Some((_, '/')) => {
+                        match input.next() {
+                            Some((_, '*')) => { comment+=1; },
+                            Some((_, _)) => { },
+                            None => return Err(0), // TODO end of file
+                        }
+                    }
                     Some((_, _)) => { },
                     None => return Err(0),  // TODO end of file
                 }
@@ -296,8 +304,6 @@ mod test {
         let result = lex.lex(&mut input);
 
         assert_eq!( result, Ok(Lexeme::Junk) );
-
-        panic!("{:?}", input.next());
 
         assert!( matches!( input.next(), Some((_, 'a') ) ) );
     }
