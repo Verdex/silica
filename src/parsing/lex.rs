@@ -322,7 +322,14 @@ mod test {
 
     #[test]
     fn junk_lexer_should_leave_lonely_slash() {
+        let lex = JunkLexer {};
+        let mut input = Input { cs : " / ".char_indices().peekable() };
 
+        let result = lex.lex(&mut input);
+
+        assert_eq!( result, Ok(Lexeme::Junk) );
+
+        assert!( matches!( input.next(), Some((_, '/') ) ) );
     }
 
     #[test]
