@@ -260,8 +260,6 @@ impl Lexer for StringLexer {
 // TODO Number lexer
 // TODO add indices to lexemes
 // TODO punctuation lexers
-// TODO junk lexers
-
 
 #[cfg(test)]
 mod test {
