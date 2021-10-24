@@ -302,9 +302,31 @@ impl Lexer for KeywordLexer {
     }
 }
 
+struct PunctLexer {
+    punct : char,
+    lexeme : Lexeme,
+}
+
+impl Lexer for PunctLexer {
+    fn usable<'a>(&self, input : &mut Input<'a>) -> bool {
+        match input.peek() {
+            Some((_, c)) => *c == self.punct,
+            None => false,
+        }
+    }
+
+    fn lex<'a>(&self, input : &mut Input<'a>) -> Result<Lexeme, usize> {
+        let rp = input.restore_point();
+
+        match input.next() {
+            Some((_, c)) if c == self.punct => Ok(self.lexeme.clone()),
+            Some((index, _)) => { input.restore(rp); Err(index) },
+            None => { input.restore(rp); Err(0) }, // TODO get index
+        }
+    }
+}
 // TODO sci notation lexer (?)
 // TODO add indices to lexemes
-// TODO punctuation lexers
 
 #[cfg(test)]
 mod test {
