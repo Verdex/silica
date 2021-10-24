@@ -8,7 +8,7 @@ use super::lexeme::Lexeme;
 pub fn lex(s : &str) -> Vec<Lexeme> {
 
 
-    let lexers : [&dyn Lexer; 4] = [ &JunkLexer{}, &BoolLexer{}, &NumberLexer{}, &SymbolLexer{} ];
+    let lexers : [&dyn Lexer; 5] = [ &JunkLexer{}, &BoolLexer{}, &NumberLexer{}, &StringLexer{}, &SymbolLexer{} ];
 
     vec![]
 }
