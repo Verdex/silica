@@ -8,7 +8,7 @@ use super::lexeme::Lexeme;
 pub fn lex(s : &str) -> Vec<Lexeme> {
 
 
-    let lexers : [&dyn Lexer; 2] = [ &BoolLexer{}, &IntegerLexer{} ];
+    let lexers : [&dyn Lexer; 4] = [ &JunkLexer{}, &BoolLexer{}, &NumberLexer{}, &SymbolLexer{} ];
 
     vec![]
 }
@@ -461,6 +461,21 @@ mod test {
 
     #[test]
     fn number_lexer_should_stop_and_ignore_trailing_dot() {
+
+    }
+
+    #[test]
+    fn number_lexer_should_lex_decimal() {
+
+    }
+
+    #[test]
+    fn number_lexer_should_fail_second_dot() {
+
+    }
+
+    #[test]
+    fn number_lexer_should_lex_negative_decimal() {
 
     }
 }
