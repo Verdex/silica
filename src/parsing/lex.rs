@@ -169,9 +169,9 @@ impl Lexer for BoolLexer {
     }
 }
 
-struct IntegerLexer {}
+struct NumberLexer {}
 
-impl Lexer for IntegerLexer {
+impl Lexer for NumberLexer {
     fn usable<'a>(&self, input : &mut Input<'a>) -> bool {
         match input.peek() {
             Some((_, c)) => c.is_digit(10) || *c == '-',
@@ -181,6 +181,7 @@ impl Lexer for IntegerLexer {
 
     fn lex<'a>(&self, input : &mut Input<'a>) -> Result<Lexeme, usize> {
         let mut digits = vec![];
+        let mut has_decimal = false;
 
         match input.peek() {
             Some((_, '-')) => { input.next(); digits.push('-') },
@@ -193,6 +194,16 @@ impl Lexer for IntegerLexer {
         loop {
             match v {
                 Some((_, v)) if v.is_digit(10) => digits.push(v),
+                Some((_, '.')) if has_decimal => { input.restore(rp); break },
+                Some((_, '.')) => { 
+                    match input.peek() {
+                        Some((_, v)) if v.is_digit(10) => { },
+                        _ => { input.restore(rp); break },
+                    }
+
+                    has_decimal = true;
+                    digits.push('.');
+                },
                 Some((_, _)) => { input.restore(rp); break},
                 _ => break,
             }
@@ -200,9 +211,14 @@ impl Lexer for IntegerLexer {
             v = input.next();
         }
 
-        let res = digits.into_iter().collect::<String>().parse::<i64>().expect("parse::<i64>() failure");
-
-        Ok(Lexeme::Integer(res))
+        if has_decimal {
+            let res = digits.into_iter().collect::<String>().parse::<f64>().expect("parse::<f64>() failure");
+            Ok(Lexeme::Decimal(res))
+        }
+        else {
+            let res = digits.into_iter().collect::<String>().parse::<i64>().expect("parse::<i64>() failure");
+            Ok(Lexeme::Integer(res))
+        }
     }
 }
 
@@ -412,34 +428,39 @@ mod test {
     }
 
     #[test]
-    fn integer_lexer_should_lex_standard_integer() {
-        let lex = IntegerLexer {};
+    fn number_lexer_should_lex_standard_integer() {
+        let lex = NumberLexer {};
         let mut input = Input { cs : "1234".char_indices().peekable() };
 
-        let r = lex.lex(&mut input).expect("IntegerLexer should lex standard integer");
+        let r = lex.lex(&mut input).expect("NumberLexer should lex standard integer");
 
         assert_eq!( r, Lexeme::Integer(1234) );
     }
 
     #[test]
-    fn integer_lexer_should_not_conume_ending_input() {
-        let lex = IntegerLexer {};
+    fn number_lexer_should_not_conume_ending_input() {
+        let lex = NumberLexer {};
         let mut input = Input { cs : "1234s".char_indices().peekable() };
 
-        let r = lex.lex(&mut input).expect("IntegerLexer should lex standard integer");
+        let r = lex.lex(&mut input).expect("NumberLexer should lex standard integer");
 
         assert_eq!( r, Lexeme::Integer(1234) );
         assert!( matches!( input.next(), Some((_, 's'))) );
     }
 
     #[test]
-    fn integer_lexer_should_lex_negative_input() {
-        let lex = IntegerLexer {};
+    fn number_lexer_should_lex_negative_input() {
+        let lex = NumberLexer {};
         let mut input = Input { cs : "-1234s".char_indices().peekable() };
 
-        let r = lex.lex(&mut input).expect("IntegerLexer should lex standard integer");
+        let r = lex.lex(&mut input).expect("NumberLexer should lex standard integer");
 
         assert_eq!( r, Lexeme::Integer(-1234) );
         assert!( matches!( input.next(), Some((_, 's'))) );
+    }
+
+    #[test]
+    fn number_lexer_should_stop_and_ignore_trailing_dot() {
+
     }
 }

@@ -6,6 +6,7 @@ pub enum Lexeme {
     UpperCaseSymbol(String),
     Bool(bool),
     Integer(i64),
+    Decimal(f64),
     String(String),
 }
 
