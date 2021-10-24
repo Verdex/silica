@@ -276,10 +276,35 @@ impl Lexer for StringLexer {
     }
 }
 
+struct KeywordLexer {
+    keyword : &'static str,
+    lexeme : Lexeme,
+}
+
+impl Lexer for KeywordLexer {
+    fn usable<'a>(&self, input : &mut Input<'a>) -> bool {
+        match self.lex(input) {
+            Ok(_) => true,
+            Err(_) => false,
+        }
+    }
+
+    fn lex<'a>(&self, input : &mut Input<'a>) -> Result<Lexeme, usize> {
+        let symbol_lexer = SymbolLexer {};
+
+        let rp = input.restore_point();
+
+        match symbol_lexer.lex(input) {
+            Ok(Lexeme::LowerCaseSymbol(lexeme)) if lexeme == self.keyword => Ok(self.lexeme.clone()),
+            Ok(Lexeme::UpperCaseSymbol(lexeme)) if lexeme == self.keyword => Ok(self.lexeme.clone()),
+            _ => { input.restore(rp); Err(0) }, // TODO need a way to grab index
+        }
+    }
+}
+
 // TODO sci notation lexer (?)
 // TODO add indices to lexemes
 // TODO punctuation lexers
-// TODO keyword lexer
 
 #[cfg(test)]
 mod test {
