@@ -194,7 +194,12 @@ impl Lexer for NumberLexer {
         loop {
             match v {
                 Some((_, v)) if v.is_digit(10) => digits.push(v),
-                Some((_, '.')) if has_decimal => { input.restore(rp); break },
+                Some((index, '.')) if has_decimal => { 
+                    match input.peek() {
+                        Some((index, v)) if v.is_digit(10) => { return Err(*index); },
+                        _ => { input.restore(rp); break },
+                    }
+                }, 
                 Some((_, '.')) => { 
                     match input.peek() {
                         Some((_, v)) if v.is_digit(10) => { },
@@ -271,9 +276,7 @@ impl Lexer for StringLexer {
     }
 }
 
-// TODO Decimal Lexer
 // TODO sci notation lexer (?)
-// TODO Number lexer
 // TODO add indices to lexemes
 // TODO punctuation lexers
 // TODO keyword lexer
@@ -460,22 +463,56 @@ mod test {
     }
 
     #[test]
-    fn number_lexer_should_stop_and_ignore_trailing_dot() {
+    fn number_lexer_should_stop_and_ignore_trailing_dot_on_decimal() {
+        let lex = NumberLexer {};
+        let mut input = Input { cs : "1234.5678.".char_indices().peekable() };
 
+        let r = lex.lex(&mut input).expect("NumberLexer should lex standard integer");
+
+        assert_eq!( r, Lexeme::Decimal(1234.5678) );
+        assert!( matches!( input.next(), Some((_, '.'))) );
+    }
+
+    #[test]
+    fn number_lexer_should_stop_and_ignore_trailing_dot_on_integer() {
+        let lex = NumberLexer {};
+        let mut input = Input { cs : "1234.".char_indices().peekable() };
+
+        let r = lex.lex(&mut input).expect("NumberLexer should lex standard integer");
+
+        assert_eq!( r, Lexeme::Integer(1234) );
+        assert!( matches!( input.next(), Some((_, '.'))) );
     }
 
     #[test]
     fn number_lexer_should_lex_decimal() {
+        let lex = NumberLexer {};
+        let mut input = Input { cs : "1234.5678s".char_indices().peekable() };
 
+        let r = lex.lex(&mut input).expect("NumberLexer should lex standard integer");
+
+        assert_eq!( r, Lexeme::Decimal(1234.5678) );
+        assert!( matches!( input.next(), Some((_, 's'))) );
     }
 
     #[test]
     fn number_lexer_should_fail_second_dot() {
+        let lex = NumberLexer {};
+        let mut input = Input { cs : "-1234.5678.99s".char_indices().peekable() };
 
+        let r = lex.lex(&mut input);
+
+        assert!( matches!( r, Err(_) ) );
     }
 
     #[test]
     fn number_lexer_should_lex_negative_decimal() {
+        let lex = NumberLexer {};
+        let mut input = Input { cs : "-1234.5678s".char_indices().peekable() };
 
+        let r = lex.lex(&mut input).expect("NumberLexer should lex standard integer");
+
+        assert_eq!( r, Lexeme::Decimal(-1234.5678) );
+        assert!( matches!( input.next(), Some((_, 's'))) );
     }
 }
