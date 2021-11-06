@@ -10,41 +10,81 @@ fun name <parameter*> = <expr> ;
 
 ### let
 
-### spec
+```
+let x = <expr>;
+```
+
+### **spec**
+
+Types of symbols can be explicitly defined using the spec statement.
 
 ```
 spec name = <type> ;
+spec name<a,b,c> = <type> ;
 ```
 
 ## expressions
 
 ### function call
 
-### dot accessor
-
-### list
-
 ### tuple
 
+```
+(<expr>[,]*)
+```
+
 ### match
+
+```
+match <expr> {
+    <pattern> => <expr>, *
+}
+```
 
 ### block
 
 ```
 { 
-    <statements*>
+    <statement>;*
     <expr>
 }
 ```
 
 ### object constructor
 
+```
+Constructor
+Constructor(<expr>[,]*)
+```
+
 ## types
+
+### type 
+
+type declarations: 
+
+```
+type name = <type>;
+type name<a,b,c> = <type>;
+```
+
+```
+<type> = <generic type : lower case symbol>
+       | <concrete type : upper case symbol>
+       | <type> -> <type>
+       | (<type>[,]*)
+       | concrete_type<type[,]*>
+```
 
 ### generic vs concrete 
 
 Concrete types need to be upper case while generic types are lower case.
 
-### polymorphic variants
+## data
 
-### row polymorphism
+```
+data name[<generic_type_list>] = <constructor_list>+ ;
+
+constructor = UpperCaseSymbol
+            | UpperCaseSymbol(type_list)
+```
