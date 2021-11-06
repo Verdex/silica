@@ -2,6 +2,8 @@
 #[derive(PartialEq, Debug, Clone)]
 pub enum Lexeme {
     Junk,
+    RParen,
+    LParen,
     LowerCaseSymbol(String),
     UpperCaseSymbol(String),
     Bool(bool),
