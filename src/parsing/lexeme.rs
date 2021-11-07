@@ -12,6 +12,7 @@ pub enum Lexeme {
     OrBar,
     Fun,
     Let,
+    Data,
     Spec,
     SemiColon,
     Comma,
