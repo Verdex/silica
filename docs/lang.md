@@ -61,12 +61,6 @@ Constructor(<expr>[,]*)
 
 ### type 
 
-type declarations: 
-
-```
-type name = <type>;
-type name<a,b,c> = <type>;
-```
 
 ```
 <type> = <generic type : lower case symbol>
