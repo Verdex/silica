@@ -226,7 +226,7 @@ impl Lexer for NumberLexer {
         loop {
             match v {
                 Some((_, v)) if v.is_digit(10) => digits.push(v),
-                Some((index, '.')) if has_decimal => { 
+                Some((_, '.')) if has_decimal => { 
                     match input.peek() {
                         Some((index, v)) if v.is_digit(10) => { return Err(*index); },
                         _ => { input.restore(rp); break },
