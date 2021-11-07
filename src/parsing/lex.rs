@@ -301,27 +301,39 @@ impl Lexer for KeywordLexer {
     }
 }
 
-struct PunctLexer {
-    punct : char,
+struct PunctLexer<const X : usize>{
+    punct : [char; X],
     lexeme : Lexeme,
 }
 
-impl Lexer for PunctLexer {
+impl<const X : usize> Lexer for PunctLexer<X> {
     fn usable<'a>(&self, input : &mut Input<'a>) -> bool {
-        match input.peek() {
-            Some((_, c)) => *c == self.punct,
-            None => false,
+        let rp = input.restore_point();
+
+        for x in self.punct {
+            match input.next() {
+                Some((_, c)) if c != x  => { input.restore(rp); return false; },
+                None => return false,
+                _ => { },
+            }
         }
+
+        input.restore(rp);
+        true
     }
 
     fn lex<'a>(&self, input : &mut Input<'a>) -> Result<Lexeme, usize> {
         let rp = input.restore_point();
 
-        match input.next() {
-            Some((_, c)) if c == self.punct => Ok(self.lexeme.clone()),
-            Some((index, _)) => { input.restore(rp); Err(index) },
-            None => { input.restore(rp); Err(0) }, // TODO get index
+        for x in self.punct {
+            match input.next() {
+                Some((index, c)) if c != x  => { input.restore(rp); return Err(index); },
+                None => { input.restore(rp); return Err(0); }, // TODO end of file
+                _ => { },
+            }
         }
+
+        Ok(self.lexeme.clone())
     }
 }
 // TODO sci notation lexer (?)
