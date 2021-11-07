@@ -7,7 +7,27 @@ use super::lexeme::Lexeme;
 
 pub fn lex(s : &str) -> Vec<Lexeme> {
 
-    let lexers : [&dyn Lexer; 5] = [ &JunkLexer{}, &BoolLexer{}, &NumberLexer{}, &StringLexer{}, &SymbolLexer{} ];
+    let lexers : [&dyn Lexer; 20] = [ &JunkLexer{}
+                                   , &BoolLexer{}
+                                   , &NumberLexer{}
+                                   , &StringLexer{}
+                                   , &PunctLexer{ punct : ['('], lexeme : Lexeme::LParen }
+                                   , &PunctLexer{ punct : [')'], lexeme : Lexeme::RParen }
+                                   , &PunctLexer{ punct : ['<'], lexeme : Lexeme::LAngle }
+                                   , &PunctLexer{ punct : ['>'], lexeme : Lexeme::RAngle }
+                                   , &PunctLexer{ punct : ['{'], lexeme : Lexeme::LCurl }
+                                   , &PunctLexer{ punct : ['}'], lexeme : Lexeme::RCurl }
+                                   , &PunctLexer{ punct : ['|'], lexeme : Lexeme::OrBar }
+                                   , &PunctLexer{ punct : [';'], lexeme : Lexeme::SemiColon }
+                                   , &PunctLexer{ punct : [','], lexeme : Lexeme::Comma }
+                                   , &PunctLexer{ punct : ['='], lexeme : Lexeme::Equal }
+                                   , &PunctLexer{ punct : ['=', '>'], lexeme : Lexeme::RightDoubleArrow }
+                                   , &KeywordLexer{ keyword : "fun", lexeme : Lexeme::Fun }
+                                   , &KeywordLexer{ keyword : "let", lexeme : Lexeme::Let }
+                                   , &KeywordLexer{ keyword : "spec", lexeme : Lexeme::Spec }
+                                   , &KeywordLexer{ keyword : "data", lexeme : Lexeme::Data }
+                                   , &SymbolLexer{} 
+                                   ];
 
     vec![]
 }
